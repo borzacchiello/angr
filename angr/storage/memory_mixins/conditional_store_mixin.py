@@ -19,6 +19,11 @@ class ConditionalMixin(MemoryMixin):
         if self.state.solver.is_false(condition):
             return
 
+        data_size = len(data) // self.state.arch.byte_width
+        if size is None:
+            size = data_size
+        elif size < data_size:
+            data = data.get_bytes(0, size)
         default_data = super().load(addr, size=len(data) // self.state.arch.byte_width, **kwargs)
         conditional_data = claripy.If(condition, data, default_data)
         super().store(addr, conditional_data, size=size, **kwargs)
