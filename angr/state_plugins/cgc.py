@@ -77,9 +77,16 @@ class SimStateCGC(SimStatePlugin):
     def _combine(self, others):
         merging_occured = False
 
-        new_allocation_base = max(o.allocation_base for o in others)
-        if self.state.solver.symbolic(new_allocation_base):
-            raise ValueError("wat")
+        allocation_bases = []
+        for alloc_base in [o.allocation_base for o in others]:
+            if self.state.solver.symbolic(alloc_base):
+                raise ValueError("wat")
+            allocation_bases.append(self.state.solver.eval(alloc_base))
+
+        if len(allocation_bases) == 1:
+            new_allocation_base = allocation_bases[0]
+        else:
+            new_allocation_base = max(*allocation_bases)
 
         concrete_allocation_base = self.state.solver.eval(self.allocation_base)
         concrete_new_allocation_base = self.state.solver.eval(new_allocation_base)
