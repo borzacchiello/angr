@@ -41,7 +41,7 @@ class memset(angr.SimProcedure):
         if self.state.solver.symbolic(num):
             l.debug("symbolic length")
             max_size = self.state.solver.min_int(num) + self.state.libc.max_buffer_size
-            write_bytes = self.state.solver.Concat(*([ char ] * max_size))
+            write_bytes = self.state.solver.Concat(*([ char[7:0] ] * max_size))
             self.state.memory.store(dst_addr, write_bytes, size=num)
         else:
             max_size = self.state.solver.eval(num)
@@ -53,7 +53,7 @@ class memset(angr.SimProcedure):
 
                 if self.state.solver.symbolic(char):
                     l.debug("symbolic char")
-                    write_bytes = self.state.solver.Concat(*([char] * chunksize))
+                    write_bytes = self.state.solver.Concat(*([char[7:0]] * chunksize))
                 else:
                     # Concatenating many bytes is slow, so some sort of optimization is required
                     if char._model_concrete.value == 0:
